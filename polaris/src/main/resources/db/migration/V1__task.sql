@@ -7,13 +7,12 @@ CREATE TABLE IF NOT EXISTS task (
     description text not null,
     deadline date,
     assignee_id bigint not null,
-    doing boolean not null,
     done boolean not null
 );
 
 INSERT INTO task
-    (title, task_type, description, deadline, assignee_id, doing, done)
+    (title, task_type, description, deadline, assignee_id, done)
 SELECT
-    'initial task', 'TODO', 'this is sample task', '2020-12-10', 1, false, false
+    'initial task', 'TODO', 'this is sample task', '2020-12-10', 1, false
 WHERE NOT EXISTS
     ( SELECT id FROM task );

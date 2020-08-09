@@ -33,7 +33,13 @@ public class LogService {
         if(target.isEmpty()){
             return;
         }
+        if(target.get().getTask().isDone()){
+            Task redo = target.get().getTask();
+            redo.setDone(false);
+            taskRepository.save(redo);
+        }
         logRepository.delete(target.get());
+
     }
 
     public Log recordLog(Long taskId, LocalDate logDate, Long usedHour, Long progress, String memo) throws IllegalLogingException {
@@ -41,19 +47,24 @@ public class LogService {
         if(associatedTask.isEmpty()){
             throw new TaskNotFoundException("task not found, check task id");
         }
+        Task task = associatedTask.get();
         long currentProgress = logRepository
-                .findByTask(associatedTask.get())
+                .findByTask(task)
                 .stream()
                 .mapToLong(l -> l.getProgress())
                 .sum();
-        if(currentProgress + progress > 100){
+        if(currentProgress + progress > 100L){
             throw new LogTooMuchException("progress exceeds 100");
+        }
+        if(currentProgress + progress == 100L){
+            task.setDone(true);
+            taskRepository.save(task);
         }
         Log log = new Log();
         log.setLogDate(logDate);
         log.setProgress(progress);
         log.setUsedHour(usedHour);
-        log.setTask(associatedTask.get());
+        log.setTask(task);
         log.setMemo(memo);
         logRepository.save(log);
         return log;

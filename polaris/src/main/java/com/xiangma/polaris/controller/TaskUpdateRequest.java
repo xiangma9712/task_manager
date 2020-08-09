@@ -15,21 +15,15 @@ public class TaskUpdateRequest {
 
     private String taskType;
 
-    private String deadline;
+    private LocalDate deadline;
 
     private String description;
 
     private Long assigneeId;
 
-    private boolean doing;
-
     private boolean done;
 
     public TaskType getConvertedTaskType(){
         return TaskType.valueOf(this.taskType);
-    }
-
-    public LocalDate getConvertedDeadline(){
-        return LocalDate.parse(this.deadline);
     }
 }

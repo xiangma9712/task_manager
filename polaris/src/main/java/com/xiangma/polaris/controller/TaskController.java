@@ -43,9 +43,8 @@ public class TaskController {
                 request.getTitle(),
                 request.getConvertedTaskType(),
                 request.getDescription(),
-                request.getConvertedDeadline(),
+                request.getDeadline(),
                 request.getAssigneeId(),
-                request.isDoing(),
                 request.isDone()
         );
         return new ResponseEntity<>(HttpStatus.ACCEPTED);

@@ -5,7 +5,6 @@ export type Task = {
   description: string;
   deadline: string;
   assigneeId: number;
-  doing: boolean;
   done: boolean;
 };
 
