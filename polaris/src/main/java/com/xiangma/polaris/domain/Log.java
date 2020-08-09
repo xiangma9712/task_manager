@@ -21,7 +21,7 @@ public class Log {
     private Long id;
 
     /** 紐づくタスク */
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, targetEntity = Task.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Task.class)
     @JoinColumn(name = "fk_task")
     private Task task;
 
