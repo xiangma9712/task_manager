@@ -1,6 +1,8 @@
 package com.xiangma.polaris.service;
 
+import com.xiangma.polaris.domain.LogRepository;
 import com.xiangma.polaris.domain.Task;
+import com.xiangma.polaris.domain.Log;
 import com.xiangma.polaris.domain.TaskRepository;
 import com.xiangma.polaris.domain.TaskType;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
+    private final LogRepository logRepository;
 
     public List<Task> findAll(Long assignerId){
         return taskRepository.findByAssigneeId(assignerId);
@@ -35,6 +38,8 @@ public class TaskService {
         if(target.isEmpty()){
             return;
         }
+        List<Log> relatedLogs = logRepository.findByTask(target.get());
+        logRepository.deleteAll(relatedLogs);
         taskRepository.delete(target.get());
     }
 

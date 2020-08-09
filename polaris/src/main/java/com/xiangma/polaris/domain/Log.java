@@ -3,6 +3,7 @@ package com.xiangma.polaris.domain;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Setter
 @Table(name = "log")
 @NoArgsConstructor
+@ToString
 public class Log {
     /**　自動伝搬ID */
     @Id
@@ -19,7 +21,8 @@ public class Log {
     private Long id;
 
     /** 紐づくタスク */
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, targetEntity = Task.class)
+    @JoinColumn(name = "fk_task")
     private Task task;
 
     /** 作業日時 */

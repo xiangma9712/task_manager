@@ -7,4 +7,7 @@ import java.util.List;
 
 @Repository
 public interface LogRepository extends JpaRepository<Log, Long> {
+    public List<Log> findByTask(Task task);
+
+    public List<Log> findByTaskIn(List<Task> tasks);
 }

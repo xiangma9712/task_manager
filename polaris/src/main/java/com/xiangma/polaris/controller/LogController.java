@@ -17,7 +17,7 @@ public class LogController {
     private final LogService logService;
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<LogResponse> getLogs(@PathVariable Long taskId){
+    public ResponseEntity<LogResponse> getLogs(@PathVariable Long taskId) {
         List<Log> logs = logService.getLogsByTask(taskId);
         long sumProgress = logs.stream().mapToLong(l -> l.getProgress()).sum();
         LogResponse response = LogResponse.builder()
@@ -27,15 +27,21 @@ public class LogController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/list/{userId}")
+    public ResponseEntity<List<Log>> getLogsByUser(@PathVariable Long userId) {
+        List<Log> logs = logService.getLogsByUserId(userId);
+        return new ResponseEntity<>(logs, HttpStatus.OK);
+    }
+
     @DeleteMapping("/{logId}")
-    public ResponseEntity<HttpStatus> deleteLog(@PathVariable Long logId){
+    public ResponseEntity<HttpStatus> deleteLog(@PathVariable Long logId) {
         logService.deleteLog(logId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/")
-    public ResponseEntity<HttpStatus> recordLog(@RequestBody LogAddRequest request){
-        try{
+    public ResponseEntity<HttpStatus> recordLog(@RequestBody LogAddRequest request) {
+        try {
             logService.recordLog(
                     request.getTaskId(),
                     request.getLogDate(),
@@ -44,8 +50,7 @@ public class LogController {
                     request.getMemo()
             );
             return new ResponseEntity<>(HttpStatus.CREATED);
-        }
-        catch (IllegalLogingException e){
+        } catch (IllegalLogingException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

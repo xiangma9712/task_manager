@@ -13,4 +13,4 @@ CREATE TABLE task (
 
 INSERT INTO task
     (title, task_type, description, deadline, assignee_id, doing, done)
-    VALUES ('initial task', 'TODO', 'this is sample task', '2020-12-10', 1, false, false);
+VALUES ('initial task', 'TODO', 'this is sample task', '2020-12-10', 1, false, false)

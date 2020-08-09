@@ -1,9 +1,6 @@
 package com.xiangma.polaris.service;
 
-import com.xiangma.polaris.domain.Log;
-import com.xiangma.polaris.domain.LogRepository;
-import com.xiangma.polaris.domain.Task;
-import com.xiangma.polaris.domain.TaskRepository;
+import com.xiangma.polaris.domain.*;
 import com.xiangma.polaris.exception.IllegalLogingException;
 import com.xiangma.polaris.exception.LogTooMuchException;
 import com.xiangma.polaris.exception.TaskNotFoundException;
@@ -26,7 +23,7 @@ public class LogService {
         if(target.isEmpty()){
             return Collections.emptyList();
         }
-        return target.get().getRelatedLogs();
+        return logRepository.findByTask(target.get());
     }
 
     public void deleteLog(Long logId){
@@ -42,8 +39,8 @@ public class LogService {
         if(associatedTask.isEmpty()){
             throw new TaskNotFoundException("task not found, check task id");
         }
-        long currentProgress = associatedTask.get()
-                .getRelatedLogs()
+        long currentProgress = logRepository
+                .findByTask(associatedTask.get())
                 .stream()
                 .mapToLong(l -> l.getProgress())
                 .sum();
@@ -53,10 +50,15 @@ public class LogService {
         Log log = new Log();
         log.setLogDate(logDate);
         log.setProgress(progress);
-        log.setTask(associatedTask.get());
         log.setUsedHour(usedHour);
+        log.setTask(associatedTask.get());
         log.setMemo(memo);
         logRepository.save(log);
         return log;
+    }
+
+    public List<Log> getLogsByUserId(Long userId){
+        List<Task> relatedTasks = taskRepository.findByAssigneeId(userId);
+        return logRepository.findByTaskIn(relatedTasks);
     }
 }

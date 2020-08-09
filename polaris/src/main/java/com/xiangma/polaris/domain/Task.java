@@ -13,7 +13,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Table(name = "task")
-@ToString(exclude = "relatedLogs")
 public class Task {
     /**　自動伝搬ID */
     @Id
@@ -47,13 +46,6 @@ public class Task {
     /** 終了flag */
     @Column(nullable = false)
     private boolean done;
-
-    /** ログと紐づける */
-    @Setter(AccessLevel.NONE)
-    @JsonIgnore
-    @Transient
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "task")
-    private List<Log> relatedLogs = new ArrayList<>();
 
     public static Task getNewTemplate(){
         Task newOne = new Task();
