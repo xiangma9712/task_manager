@@ -101,4 +101,12 @@ public class TaskService {
         task.setDone(done);
         taskRepository.save(task);
     }
+
+    public Task getTaskById(Long id){
+        Optional<Task> target = taskRepository.findById(id);
+        if(target.isEmpty()){
+            return null;
+        }
+        return target.get();
+    }
 }

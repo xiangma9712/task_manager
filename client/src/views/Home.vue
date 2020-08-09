@@ -32,11 +32,12 @@
                 記録
               </button>
               <button
-                class="button is-small is-danger has-margin-left-5"
+                class="button is-small is-danger has-margin-left-5 has-margin-right-5"
                 @click="deleteTask(task.id)"
               >
                 削除
               </button>
+              <router-link :to="`/task/${task.id}`" class="button is-small has-margin-left-5" tag="button">詳細</router-link>
             </td>
           </tr>
         </tbody>
