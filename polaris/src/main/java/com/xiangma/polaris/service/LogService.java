@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -60,5 +62,30 @@ public class LogService {
     public List<Log> getLogsByUserId(Long userId){
         List<Task> relatedTasks = taskRepository.findByAssigneeId(userId);
         return logRepository.findByTaskIn(relatedTasks);
+    }
+
+    public Map<String,Long> getLogHistory(Long userId){
+        List<Log> logs = getLogsByUserId(userId);
+        List<Log> lastOneYearLog = logs
+                .stream()
+                .filter(l -> Period.between(l.getLogDate(),LocalDate.now()).getYears() < 1)
+                .collect(Collectors.toList());
+
+        Set<String> month = lastOneYearLog
+                .stream()
+                .map(Log::getLogDate)
+                .map(d -> d.format(DateTimeFormatter.ofPattern("LLL")))
+                .collect(Collectors.toSet());
+
+        return month.stream().collect(Collectors.toMap(
+                m -> m,
+                m -> lastOneYearLog
+                        .stream()
+                        .filter(l -> l.getLogDate().format(DateTimeFormatter.ofPattern("LLL")).equals(m))
+                        .mapToLong(Log::getUsedHour)
+                        .sum(),
+                (oldVal,newVal) -> newVal,
+                HashMap::new
+        ));
     }
 }
