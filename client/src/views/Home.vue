@@ -26,7 +26,13 @@
             <td>{{ task.description }}</td>
             <td>
               <button
-                class="button is-small is-danger"
+                class="button is-small is-info has-margin-right-5"
+                @click="recordLog(task)"
+              >
+                記録
+              </button>
+              <button
+                class="button is-small is-danger has-margin-left-5"
                 @click="deleteTask(task.id)"
               >
                 削除
@@ -36,11 +42,19 @@
         </tbody>
       </table>
     </div>
-    <div class="modal" :class="{ 'is-active': isEditing }">
+    <div class="modal" :class="{ 'is-active': isEditingTask }">
       <div class="modal-background"></div>
       <task-input
         :taskArg="editingTask"
-        :isNew="isEditingNew"
+        :isNew="isNew"
+        @close="close"
+        @closeWithSuccessMessage="closeWithSuccessMessage"
+      />
+    </div>
+    <div class="modal" :class="{ 'is-active': isRecodingLog }">
+      <div class="modal-background"></div>
+      <log-input
+        :task="editingTask"
         @close="close"
         @closeWithSuccessMessage="closeWithSuccessMessage"
       />
@@ -54,39 +68,62 @@ import moment from "moment";
 import { Task, EMPTY_TASK } from "@/helper/task";
 import TaskInput from "@/components/TaskInput.vue";
 import Toast from "@/components/Toast.vue";
+import LogInput from "@/components/LogInput.vue";
+
+const enum SystemStatus {
+  SHOWING_LIST,
+  ADDING_TASK,
+  EDITING_TASK,
+  RECORDING_LOG
+}
 
 @Component({
   components: {
     TaskInput,
+    LogInput,
     Toast
   }
 })
 export default class Home extends Vue {
-  //data
+  /** data */
   public tasks: Array<Task> = [];
-  public isEditing = false;
   public editingTask: Task = EMPTY_TASK;
-  public isEditingNew = true;
+  public status: SystemStatus = SystemStatus.SHOWING_LIST;
   public toastMessage = "";
-  //computed
-  public userId() {
+
+  /** computed */
+  get userId() {
     return 1;
   }
+  get isEditingTask() {
+    return (
+      this.status === SystemStatus.ADDING_TASK ||
+      this.status === SystemStatus.EDITING_TASK
+    );
+  }
+  get isNew() {
+    return this.status === SystemStatus.ADDING_TASK;
+  }
+  get isRecodingLog() {
+    return this.status === SystemStatus.RECORDING_LOG;
+  }
 
+  /** life cycle */
   created() {
     this.refresh();
   }
 
-  //methods
+  /** methods */
   public async refresh() {
     try {
-      const response = await this.$axios.get(`/task/${this.userId()}`);
+      const response = await this.$axios.get(`/task/${this.userId}`);
       this.$set(this, "tasks", response.data.tasks);
     } catch (error) {
       console.log(error);
     }
   }
 
+  //filterは今後なくなる仕様のためmethodとして定義
   public isOver(deadlineStr: string) {
     const deadline = moment(deadlineStr);
     const now = moment();
@@ -94,21 +131,25 @@ export default class Home extends Vue {
   }
 
   public addTask() {
-    this.isEditingNew = true;
-    this.isEditing = true;
+    this.status = SystemStatus.ADDING_TASK;
+  }
+
+  public recordLog(task: Task) {
+    this.$set(this, "editingTask", Object.assign({}, task));
+    this.status = SystemStatus.RECORDING_LOG;
   }
 
   public close() {
-    this.isEditing = false;
-    this.$set(this,"editingTask",EMPTY_TASK);
+    this.status = SystemStatus.SHOWING_LIST;
+    this.$set(this, "editingTask", EMPTY_TASK);
   }
 
   public async closeWithSuccessMessage(payload: string) {
     this.toastMessage = "";
     await this.refresh();
-    this.isEditing = false;
+    this.status = SystemStatus.SHOWING_LIST;
     this.toastMessage = payload;
-    this.$set(this,"editingTask",EMPTY_TASK);
+    this.$set(this, "editingTask", EMPTY_TASK);
   }
 
   public async deleteTask(id: number) {

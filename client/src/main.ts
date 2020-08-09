@@ -4,6 +4,7 @@ import router from "./router";
 import axios, { AxiosStatic } from "axios";
 
 require("@/assets/main.scss");
+require("bulma-spacing/bulma-spacing.scss");
 
 Vue.config.productionTip = false;
 
