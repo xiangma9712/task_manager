@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/log")
@@ -31,6 +32,12 @@ public class LogController {
     public ResponseEntity<List<Log>> getLogsByUser(@PathVariable Long userId) {
         List<Log> logs = logService.getLogsByUserId(userId);
         return new ResponseEntity<>(logs, HttpStatus.OK);
+    }
+
+    @GetMapping("/analytics/{userId}")
+    public ResponseEntity<Map<String, Long>> getAnalytics(@PathVariable Long userId) {
+        Map<String, Long> analytics = logService.getLogHistory(userId);
+        return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
     @DeleteMapping("/{logId}")

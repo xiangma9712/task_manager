@@ -1,10 +1,10 @@
 <template>
   <div class="container">
+    <h2 class="is-size-3 has-margin-bottom-10">Task List</h2>
     <toast :message="toastMessage" />
     <div class="box">
       <button class="button is-primary" @click="addTask">追加</button>
-      <p>ToDoList</p>
-      <table class="table is-fullwidth">
+      <table v-if="isWideEnough" class="table is-fullwidth">
         <thead>
           <th>タイトル</th>
           <th>種類</th>
@@ -26,17 +26,40 @@
             <td>{{ task.description }}</td>
             <td>
               <button
-                class="button is-small is-info has-margin-right-5"
+                class="button is-small is-info has-margin-left-5 has-margin-right-5"
                 @click="recordLog(task)"
               >
                 記録
               </button>
-              <button
-                class="button is-small is-danger has-margin-left-5"
-                @click="deleteTask(task.id)"
+              <router-link
+                :to="`/task/${task.id}`"
+                class="button is-small has-margin-left-5 has-margin-right-5"
+                tag="button"
+                >詳細</router-link
               >
-                削除
-              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table v-else class="table is-fullwidth">
+        <thead>
+          <th>タイトル</th>
+          <th>種類</th>
+          <th>操作</th>
+        </thead>
+        <tbody>
+          <tr v-for="(task, index) in tasks" :key="index">
+            <td>{{ task.title }}</td>
+            <td>
+              <span class="tag">{{ task.taskType }}</span>
+            </td>
+            <td>
+              <router-link
+                :to="`/task/${task.id}`"
+                class="button is-small has-margin-left-5 has-margin-right-5"
+                tag="button"
+                >詳細</router-link
+              >
             </td>
           </tr>
         </tbody>
@@ -46,7 +69,7 @@
       <div class="modal-background"></div>
       <task-input
         :taskArg="editingTask"
-        :isNew="isNew"
+        :isNew="true"
         @close="close"
         @closeWithSuccessMessage="closeWithSuccessMessage"
       />
@@ -73,7 +96,6 @@ import LogInput from "@/components/LogInput.vue";
 const enum SystemStatus {
   SHOWING_LIST,
   ADDING_TASK,
-  EDITING_TASK,
   RECORDING_LOG
 }
 
@@ -90,27 +112,30 @@ export default class Home extends Vue {
   public editingTask: Task = EMPTY_TASK;
   public status: SystemStatus = SystemStatus.SHOWING_LIST;
   public toastMessage = "";
+  public width = window.innerWidth;
 
   /** computed */
   get userId() {
     return 1;
   }
   get isEditingTask() {
-    return (
-      this.status === SystemStatus.ADDING_TASK ||
-      this.status === SystemStatus.EDITING_TASK
-    );
-  }
-  get isNew() {
     return this.status === SystemStatus.ADDING_TASK;
   }
   get isRecodingLog() {
     return this.status === SystemStatus.RECORDING_LOG;
   }
 
+  get isWideEnough() {
+    return this.width >= 620;
+  }
+
   /** life cycle */
   created() {
     this.refresh();
+  }
+
+  mounted() {
+    window.addEventListener("resize", this.handleResize);
   }
 
   /** methods */
@@ -152,11 +177,8 @@ export default class Home extends Vue {
     this.$set(this, "editingTask", EMPTY_TASK);
   }
 
-  public async deleteTask(id: number) {
-    this.toastMessage = "";
-    await this.$axios.delete(`task/${id}`);
-    await this.refresh();
-    this.toastMessage = "削除されました";
+  public handleResize() {
+    this.width = window.innerWidth;
   }
 }
 </script>

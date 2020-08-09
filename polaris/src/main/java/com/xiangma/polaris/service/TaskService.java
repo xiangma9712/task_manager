@@ -49,19 +49,6 @@ public class TaskService {
             return null;
         }
         Task task = target.get();
-        task.setDoing(false);
-        task.setDone(false);
-        taskRepository.save(task);
-        return task;
-    }
-
-    public Task startTask(Long task_id){
-        Optional<Task> target = taskRepository.findById(task_id);
-        if(target.isEmpty()){
-            return null;
-        }
-        Task task = target.get();
-        task.setDoing(true);
         task.setDone(false);
         taskRepository.save(task);
         return task;
@@ -73,7 +60,6 @@ public class TaskService {
             return;
         }
         Task task = target.get();
-        task.setDoing(false);
         task.setDone(true);
         taskRepository.save(task);
     }
@@ -85,7 +71,6 @@ public class TaskService {
             String description,
             LocalDate deadline,
             Long assignerId,
-            boolean doing,
             boolean done){
         Optional<Task> target = taskRepository.findById(task_id);
         if(target.isEmpty()){
@@ -97,8 +82,15 @@ public class TaskService {
         task.setDescription(description);
         task.setDeadline(deadline);
         task.setAssigneeId(assignerId);
-        task.setDoing(doing);
         task.setDone(done);
         taskRepository.save(task);
+    }
+
+    public Task getTaskById(Long id){
+        Optional<Task> target = taskRepository.findById(id);
+        if(target.isEmpty()){
+            return null;
+        }
+        return target.get();
     }
 }

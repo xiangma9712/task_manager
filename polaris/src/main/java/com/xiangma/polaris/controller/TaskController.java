@@ -43,9 +43,8 @@ public class TaskController {
                 request.getTitle(),
                 request.getConvertedTaskType(),
                 request.getDescription(),
-                request.getConvertedDeadline(),
+                request.getDeadline(),
                 request.getAssigneeId(),
-                request.isDoing(),
                 request.isDone()
         );
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -55,5 +54,14 @@ public class TaskController {
     public ResponseEntity<HttpStatus> deleteTask(@PathVariable Long taskId){
         taskService.delete(taskId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/each/{taskId}")
+    public ResponseEntity<Task> getOneTask(@PathVariable Long taskId){
+        Task task = taskService.getTaskById(taskId);
+        if(task != null){
+            return new ResponseEntity<>(task,HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
     }
 }

@@ -16,6 +16,11 @@ const routes: Array<RouteConfig> = [
     component: () => import("../views/LogHistory.vue")
   },
   {
+    path: "/task/:id",
+    name: "Task Detail",
+    component: () => import("../views/TaskDetail.vue")
+  },
+  {
     path: "*",
     redirect: "/home"
   }

@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,13 @@ public class LogService {
         if(target.isEmpty()){
             return;
         }
+        if(target.get().getTask().isDone()){
+            Task redo = target.get().getTask();
+            redo.setDone(false);
+            taskRepository.save(redo);
+        }
         logRepository.delete(target.get());
+
     }
 
     public Log recordLog(Long taskId, LocalDate logDate, Long usedHour, Long progress, String memo) throws IllegalLogingException {
@@ -39,19 +47,24 @@ public class LogService {
         if(associatedTask.isEmpty()){
             throw new TaskNotFoundException("task not found, check task id");
         }
+        Task task = associatedTask.get();
         long currentProgress = logRepository
-                .findByTask(associatedTask.get())
+                .findByTask(task)
                 .stream()
                 .mapToLong(l -> l.getProgress())
                 .sum();
-        if(currentProgress + progress > 100){
+        if(currentProgress + progress > 100L){
             throw new LogTooMuchException("progress exceeds 100");
+        }
+        if(currentProgress + progress == 100L){
+            task.setDone(true);
+            taskRepository.save(task);
         }
         Log log = new Log();
         log.setLogDate(logDate);
         log.setProgress(progress);
         log.setUsedHour(usedHour);
-        log.setTask(associatedTask.get());
+        log.setTask(task);
         log.setMemo(memo);
         logRepository.save(log);
         return log;
@@ -60,5 +73,30 @@ public class LogService {
     public List<Log> getLogsByUserId(Long userId){
         List<Task> relatedTasks = taskRepository.findByAssigneeId(userId);
         return logRepository.findByTaskIn(relatedTasks);
+    }
+
+    public Map<String,Long> getLogHistory(Long userId){
+        List<Log> logs = getLogsByUserId(userId);
+        List<Log> lastOneYearLog = logs
+                .stream()
+                .filter(l -> Period.between(l.getLogDate(),LocalDate.now()).getYears() < 1)
+                .collect(Collectors.toList());
+
+        Set<String> month = lastOneYearLog
+                .stream()
+                .map(Log::getLogDate)
+                .map(d -> d.format(DateTimeFormatter.ofPattern("LLL")))
+                .collect(Collectors.toSet());
+
+        return month.stream().collect(Collectors.toMap(
+                m -> m,
+                m -> lastOneYearLog
+                        .stream()
+                        .filter(l -> l.getLogDate().format(DateTimeFormatter.ofPattern("LLL")).equals(m))
+                        .mapToLong(Log::getUsedHour)
+                        .sum(),
+                (oldVal,newVal) -> newVal,
+                HashMap::new
+        ));
     }
 }

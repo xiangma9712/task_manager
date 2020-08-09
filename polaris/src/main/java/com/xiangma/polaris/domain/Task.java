@@ -39,17 +39,12 @@ public class Task {
     @Column(nullable = false)
     private Long assigneeId;
 
-    /** 実行中flag */
-    @Column(nullable = false)
-    private boolean doing;
-
     /** 終了flag */
     @Column(nullable = false)
     private boolean done;
 
     public static Task getNewTemplate(){
         Task newOne = new Task();
-        newOne.setDoing(false);
         newOne.setDone(false);
         return newOne;
     }
