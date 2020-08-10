@@ -1,12 +1,29 @@
 <template>
   <div id="app">
-    <div id="nav">
+    <div id="nav" v-if="isLoggedIn">
       <router-link to="/">Home</router-link> |
-      <router-link to="/log">Log</router-link>
+      <router-link to="/log">Log</router-link> |
+      <a @click="logout">Sing Out</a>
     </div>
     <router-view />
   </div>
 </template>
+
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
+
+@Component
+export default class App extends Vue {
+  get isLoggedIn() {
+    return this.$store.getters["cognito/isLoggedIn"];
+  }
+
+  public async logout() {
+    await this.$store.dispatch("cognito/signOut");
+    this.$router.push("/login");
+  }
+}
+</script>
 
 <style>
 #app {
