@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "scp -r  dist/* raspi:/home/pi/html_stg",
+    "postbuild": "npm run deploy"
   },
   "dependencies": {
     "axios": "^0.19.2",
